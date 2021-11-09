@@ -37,13 +37,15 @@ constexpr uint64_t SIGBUS_ERROR_MESSAGE_LENGTH = 1024U + platform::IOX_MAX_SHM_N
 static char sigbusErrorMessage[SIGBUS_ERROR_MESSAGE_LENGTH];
 static std::mutex sigbusHandlerMutex;
 
-static void memsetSigbusHandler(int)
+static void memsetSigbusHandler(int) noexcept
 {
     auto result = write(STDERR_FILENO, sigbusErrorMessage, strnlen(sigbusErrorMessage, SIGBUS_ERROR_MESSAGE_LENGTH));
     IOX_DISCARD_RESULT(result);
     _exit(EXIT_FAILURE);
 }
 
+// TODO: reduce number of arguments by moving them to struct
+// NOLINTNEXTLINE(readability-function-size)
 SharedMemoryObject::SharedMemoryObject(const SharedMemory::Name_t& name,
                                        const uint64_t memorySizeInBytes,
                                        const AccessMode accessMode,
@@ -74,7 +76,7 @@ SharedMemoryObject::SharedMemoryObject(const SharedMemory::Name_t& name,
             });
     }
 
-    if (m_isInitialized == false)
+    if (!m_isInitialized)
     {
         auto flags = std::cerr.flags();
         std::cerr << "Unable to create a shared memory object with the following properties [ name = " << name

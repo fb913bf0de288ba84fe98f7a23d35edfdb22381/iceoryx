@@ -42,6 +42,10 @@ class PublisherPortUser;
 class SubscriberPortRouDi;
 class SubscriberPortUser;
 } // namespace popo
+namespace capro
+{
+class ServiceDescription;
+}
 
 using PublisherPortRouDiType = iox::popo::PublisherPortRouDi;
 using PublisherPortUserType = iox::popo::PublisherPortUser;
@@ -50,9 +54,6 @@ using SubscriberPortUserType = iox::popo::SubscriberPortUser;
 using UniquePortId = popo::TypedUniqueId<popo::BasePortData>;
 
 using SubscriberPortType = iox::build::CommunicationPolicy;
-
-/// @todo remove MAX_RECEIVERS_PER_SENDERPORT when the new port building blocks are used
-constexpr uint32_t MAX_RECEIVERS_PER_SENDERPORT = build::IOX_MAX_SUBSCRIBERS_PER_PUBLISHER;
 
 //--------- Communication Resources Start---------------------
 // Publisher
@@ -103,7 +104,6 @@ constexpr uint32_t MAX_NUMBER_OF_ATTACHMENTS_PER_WAITSET = 128U;
 static_assert(MAX_NUMBER_OF_ATTACHMENTS_PER_WAITSET <= MAX_NUMBER_OF_NOTIFIERS_PER_CONDITION_VARIABLE,
               "The WaitSet capacity is restricted by the maximum amount of notifiers per condition variable.");
 // Listener
-constexpr uint8_t MAX_NUMBER_OF_EVENT_VARIABLES = 128U;
 constexpr uint8_t MAX_NUMBER_OF_EVENTS_PER_LISTENER = 128U;
 static_assert(MAX_NUMBER_OF_EVENTS_PER_LISTENER <= MAX_NUMBER_OF_NOTIFIERS_PER_CONDITION_VARIABLE,
               "The Listener capacity is restricted by the maximum amount of notifiers per condition variable.");
@@ -131,10 +131,11 @@ constexpr uint32_t APP_MESSAGE_SIZE = 512U;
 
 // Processes
 constexpr uint32_t MAX_PROCESS_NUMBER = 300U;
-/// Maximum number of instances of a given service, which can be found.
+/// Maximum number of services, which can be found.
 /// This limitation is coming due to the fixed capacity of the cxx::vector (This doesn't limit the offered number of
 /// instances)
-constexpr uint32_t MAX_NUMBER_OF_INSTANCES = 50U;
+/// @todo #415 increase number back to 50 once service registry is available via shared memory
+constexpr uint32_t MAX_NUMBER_OF_SERVICES = 10U;
 
 // Nodes
 constexpr uint32_t MAX_NODE_NUMBER = 1000U;
@@ -172,13 +173,13 @@ inline constexpr const char* asStringLiteral(ConnectionState value) noexcept;
 /// @param[in] stream sink to write the message to
 /// @param[in] value to convert to a string literal
 /// @return the reference to `stream` which was provided as input parameter
-inline std::ostream& operator<<(std::ostream& stream, ConnectionState value);
+inline std::ostream& operator<<(std::ostream& stream, ConnectionState value) noexcept;
 
 /// @brief Convenience stream operator to easily use the `asStringLiteral` function with iox::log::LogStream
 /// @param[in] stream sink to write the message to
 /// @param[in] value to convert to a string literal
 /// @return the reference to `stream` which was provided as input parameter
-inline log::LogStream& operator<<(log::LogStream& stream, ConnectionState value);
+inline log::LogStream& operator<<(log::LogStream& stream, ConnectionState value) noexcept;
 
 // Default properties of ChunkDistributorData
 struct DefaultChunkDistributorConfig
@@ -232,7 +233,7 @@ enum class MonitoringMode
     OFF
 };
 
-iox::log::LogStream& operator<<(iox::log::LogStream& logstream, const MonitoringMode& mode);
+iox::log::LogStream& operator<<(iox::log::LogStream& logstream, const MonitoringMode& mode) noexcept;
 } // namespace roudi
 
 namespace mepoo
@@ -249,7 +250,7 @@ using TimePointNs_t = std::chrono::time_point<BaseClock_t, DurationNs_t>;
 
 namespace runtime
 {
-using InstanceContainer = iox::cxx::vector<capro::IdString_t, MAX_NUMBER_OF_INSTANCES>;
+using ServiceContainer = iox::cxx::vector<capro::ServiceDescription, MAX_NUMBER_OF_SERVICES>;
 using namespace units::duration_literals;
 constexpr units::Duration PROCESS_WAITING_FOR_ROUDI_TIMEOUT = 60_s;
 constexpr units::Duration PROCESS_KEEP_ALIVE_INTERVAL = 3 * roudi::DISCOVERY_INTERVAL;  // > DISCOVERY_INTERVAL

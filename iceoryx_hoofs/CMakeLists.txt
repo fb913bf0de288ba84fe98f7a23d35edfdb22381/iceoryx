@@ -19,14 +19,7 @@ cmake_minimum_required(VERSION 3.5)
 
 set(IOX_VERSION_STRING "1.90.0")
 
-
-#include("${CMAKE_CURRENT_LIST_DIR}/cmake/IceoryxVersion.cmake")
-
-#parse_version(${IOX_VERSION_STRING})
 project(iceoryx_hoofs VERSION ${IOX_VERSION_STRING})
-#adjust_version()
-
-
 
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/IceoryxPackageHelper.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/cmake/IceoryxPlatform.cmake")
@@ -164,7 +157,6 @@ add_library(iceoryx_hoofs
     source/posix_wrapper/file_lock.cpp
     source/posix_wrapper/semaphore.cpp
     source/posix_wrapper/timer.cpp
-    source/posix_wrapper/timespec.cpp
     source/posix_wrapper/shared_memory_object.cpp
     source/posix_wrapper/signal_handler.cpp
     source/posix_wrapper/message_queue.cpp

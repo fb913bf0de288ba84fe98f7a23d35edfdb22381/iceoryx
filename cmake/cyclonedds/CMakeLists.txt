@@ -28,14 +28,13 @@ if(NOT N EQUAL 0)
     endif()
 endif()
 
-if(WIN32)
-    set(CREATE_PATH_COMMAND mkdir)
-else()
-    set(CREATE_PATH_COMMAND mkdir -p)
-endif(WIN32)
-
 if(DEFINED CMAKE_TOOLCHAIN_FILE)
     set(TOOLCHAIN_FILE "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+endif()
+
+set(EXTRA_CMAKE_ARGS)
+if(DEFINED CMAKE_CXX_FLAGS)
+    list(APPEND EXTRA_CMAKE_ARGS -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS})
 endif()
 
 # ===== Helpers
@@ -62,12 +61,7 @@ function(fetch_and_install name)
     endif()
 
     # Build
-    execute_process(COMMAND ${CREATE_PATH_COMMAND} "${BUILD_DIR}"
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR} )
-    if(result)
-        message(FATAL_ERROR "CMake step [create build dir] for ${name} failed: ${result}")
-    endif()
+    file(MAKE_DIRECTORY "${BUILD_DIR}")
 
     # Parse additional CMake flags
     set(ADDITIONAL_CMAKE_FLAGS "")
@@ -76,7 +70,7 @@ function(fetch_and_install name)
     endforeach()
     string( REPLACE ";" " " ADDITIONAL_CMAKE_FLAGS "${ADDITIONAL_CMAKE_FLAGS}")
 
-    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" "-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}" "${ADDITIONAL_CMAKE_FLAGS}" "${TOOLCHAIN_FILE}" "${SOURCE_DIR}"
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" "-DCMAKE_INSTALL_PREFIX=${INSTALL_DIR}" "${ADDITIONAL_CMAKE_FLAGS}" "${TOOLCHAIN_FILE}" "${EXTRA_CMAKE_ARGS}"  "${SOURCE_DIR}"
         RESULT_VARIABLE result
         WORKING_DIRECTORY ${BUILD_DIR} )
     if(result)

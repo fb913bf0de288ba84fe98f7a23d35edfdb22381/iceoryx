@@ -28,7 +28,7 @@ namespace iox
 {
 namespace log
 {
-LogStream::LogStream(Logger& logger, LogLevel logLevel)
+LogStream::LogStream(Logger& logger, LogLevel logLevel) noexcept
     : m_logger(logger)
 {
     m_logEntry.level = logLevel;
@@ -37,12 +37,13 @@ LogStream::LogStream(Logger& logger, LogLevel logLevel)
     m_logEntry.time = std::chrono::duration_cast<std::chrono::milliseconds>(timePoint.time_since_epoch());
 }
 
-LogStream::~LogStream()
+LogStream::~LogStream() noexcept
 {
     Flush();
 }
 
-void LogStream::Flush()
+// NOLINTNEXTLINE(readability-identifier-naming)
+void LogStream::Flush() noexcept
 {
     /// @todo do we want to send the log to the logger even if the loglevel is lower than the global log level?
     if (!m_flushed)
@@ -99,7 +100,10 @@ LogStream& LogStream::operator<<(const LogRawBuffer& value) noexcept
     for (int8_t i = 0; i < value.size; ++i)
     {
         // the '+value' is there to not interpret the uint8_t as char and print the character instead of the hex value
-        ss << (i > 0 ? " " : "") << std::setw(2) << +value.data[i];
+        ss << (i > 0 ? " " : "")
+           << std::setw(2)
+           // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+           << +value.data[i];
     }
     ss << "]";
     m_logEntry.message.append(ss.str());

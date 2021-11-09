@@ -37,25 +37,34 @@ enum class LogLevelOutput : uint8_t
 class LogManager
 {
   public:
-    static LogManager& GetLogManager();
-    static Logger& CreateLogContext(std::string ctxId, std::string ctxDescription, LogLevel appDefLogLevel) noexcept;
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    static LogManager& GetLogManager() noexcept;
+    static Logger&
+    // NOLINTNEXTLINE(readability-identifier-naming)
+    CreateLogContext(const std::string& ctxId,
+                     const std::string& ctxDescription,
+                     const LogLevel appDefLogLevel) noexcept;
 
-    ~LogManager() = default;
+    ~LogManager() noexcept = default;
 
     LogManager(const LogManager&) = delete;
     LogManager(LogManager&&) = delete;
     LogManager& operator=(const LogManager&) = delete;
     LogManager& operator=(LogManager&&) = delete;
 
+    // NOLINTNEXTLINE(readability-identifier-naming)
     LogLevel DefaultLogLevel() const noexcept;
+    // NOLINTNEXTLINE(readability-identifier-naming)
     void SetDefaultLogLevel(const LogLevel logLevel,
                             const LogLevelOutput logLevelOutput = LogLevelOutput::kDisplayLogLevel) noexcept;
 
+    // NOLINTNEXTLINE(readability-identifier-naming)
     LogMode DefaultLogMode() const noexcept;
+    // NOLINTNEXTLINE(readability-identifier-naming)
     void SetDefaultLogMode(const LogMode logMode) noexcept;
 
   protected:
-    LogManager() = default;
+    LogManager() noexcept = default;
 
   private:
     std::atomic<LogLevel> m_defaultLogLevel{LogLevel::kVerbose};

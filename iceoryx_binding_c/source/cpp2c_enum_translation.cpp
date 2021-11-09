@@ -95,13 +95,15 @@ iox_ListenerResult listenerResult(const iox::popo::ListenerError value) noexcept
         return ListenerResult_LISTENER_FULL;
     case ListenerError::INVALID_STATE:
         return ListenerResult_UNDEFINED_ERROR;
+    case ListenerError::EMPTY_EVENT_CALLBACK:
+        return ListenerResult_EMPTY_EVENT_CALLBACK;
     case ListenerError::EMPTY_INVALIDATION_CALLBACK:
         return ListenerResult_EMPTY_INVALIDATION_CALLBACK;
     }
     return ListenerResult_UNDEFINED_ERROR;
 }
 
-iox_SubscriberTooSlowPolicy subscriberTooSlowPolicy(const iox::popo::SubscriberTooSlowPolicy policy)
+iox_SubscriberTooSlowPolicy subscriberTooSlowPolicy(const iox::popo::SubscriberTooSlowPolicy policy) noexcept
 {
     switch (policy)
     {
@@ -112,7 +114,7 @@ iox_SubscriberTooSlowPolicy subscriberTooSlowPolicy(const iox::popo::SubscriberT
     }
     return SubscriberTooSlowPolicy_DISCARD_OLDEST_DATA;
 }
-iox_QueueFullPolicy queueFullPolicy(const iox::popo::QueueFullPolicy policy)
+iox_QueueFullPolicy queueFullPolicy(const iox::popo::QueueFullPolicy policy) noexcept
 {
     switch (policy)
     {

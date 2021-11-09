@@ -18,6 +18,7 @@
 #include "iceoryx_posh/internal/roudi/roudi.hpp"
 #include "iceoryx_hoofs/cxx/convert.hpp"
 #include "iceoryx_hoofs/cxx/helplets.hpp"
+#include "iceoryx_hoofs/posix_wrapper/posix_access_rights.hpp"
 #include "iceoryx_hoofs/posix_wrapper/thread.hpp"
 #include "iceoryx_posh/internal/log/posh_logging.hpp"
 #include "iceoryx_posh/internal/runtime/node_property.hpp"
@@ -32,7 +33,7 @@ namespace roudi
 {
 RouDi::RouDi(RouDiMemoryInterface& roudiMemoryInterface,
              PortManager& portManager,
-             RoudiStartupParameters roudiStartupParameters)
+             RoudiStartupParameters roudiStartupParameters) noexcept
     : m_killProcessesInDestructor(roudiStartupParameters.m_killProcessesInDestructor)
     , m_runMonitoringAndDiscoveryThread(true)
     , m_runHandleRuntimeMessageThread(true)
@@ -73,18 +74,18 @@ RouDi::RouDi(RouDiMemoryInterface& roudiMemoryInterface,
     }
 }
 
-RouDi::~RouDi()
+RouDi::~RouDi() noexcept
 {
     shutdown();
 }
 
-void RouDi::startProcessRuntimeMessagesThread()
+void RouDi::startProcessRuntimeMessagesThread() noexcept
 {
     m_handleRuntimeMessageThread = std::thread(&RouDi::processRuntimeMessages, this);
     posix::setThreadName(m_handleRuntimeMessageThread.native_handle(), "IPC-msg-process");
 }
 
-void RouDi::shutdown()
+void RouDi::shutdown() noexcept
 {
     m_processIntrospection.stop();
     m_portManager->stopPortIntrospection();
@@ -142,12 +143,12 @@ void RouDi::shutdown()
     }
 }
 
-void RouDi::cyclicUpdateHook()
+void RouDi::cyclicUpdateHook() noexcept
 {
     // default implementation; do nothing
 }
 
-void RouDi::monitorAndDiscoveryUpdate()
+void RouDi::monitorAndDiscoveryUpdate() noexcept
 {
     while (m_runMonitoringAndDiscoveryThread)
     {
@@ -159,7 +160,7 @@ void RouDi::monitorAndDiscoveryUpdate()
     }
 }
 
-void RouDi::processRuntimeMessages()
+void RouDi::processRuntimeMessages() noexcept
 {
     runtime::IpcInterfaceCreator roudiIpcInterface{IPC_CHANNEL_ROUDI_NAME};
 
@@ -183,7 +184,7 @@ void RouDi::processRuntimeMessages()
 version::VersionInfo RouDi::parseRegisterMessage(const runtime::IpcMessage& message,
                                                  uint32_t& pid,
                                                  uid_t& userId,
-                                                 int64_t& transmissionTimestamp)
+                                                 int64_t& transmissionTimestamp) noexcept
 {
     cxx::convert::fromString(message.getElementAtIndex(2).c_str(), pid);
     cxx::convert::fromString(message.getElementAtIndex(3).c_str(), userId);
@@ -194,7 +195,7 @@ version::VersionInfo RouDi::parseRegisterMessage(const runtime::IpcMessage& mess
 
 void RouDi::processMessage(const runtime::IpcMessage& message,
                            const iox::runtime::IpcMessageType& cmd,
-                           const RuntimeName_t& runtimeName)
+                           const RuntimeName_t& runtimeName) noexcept
 {
     switch (cmd)
     {
@@ -212,13 +213,17 @@ void RouDi::processMessage(const runtime::IpcMessage& message,
         }
         else
         {
-            uint32_t pid;
-            uid_t userId;
-            int64_t transmissionTimestamp;
+            uint32_t pid{0U};
+            uid_t userId{0};
+            int64_t transmissionTimestamp{0};
             version::VersionInfo versionInfo = parseRegisterMessage(message, pid, userId, transmissionTimestamp);
 
-            registerProcess(
-                runtimeName, pid, {userId}, transmissionTimestamp, getUniqueSessionIdForProcess(), versionInfo);
+            registerProcess(runtimeName,
+                            pid,
+                            iox::posix::PosixUser{userId},
+                            transmissionTimestamp,
+                            getUniqueSessionIdForProcess(),
+                            versionInfo);
         }
         break;
     }
@@ -454,20 +459,20 @@ void RouDi::registerProcess(const RuntimeName_t& name,
                             const posix::PosixUser user,
                             const int64_t transmissionTimestamp,
                             const uint64_t sessionId,
-                            const version::VersionInfo& versionInfo)
+                            const version::VersionInfo& versionInfo) noexcept
 {
     bool monitorProcess = (m_monitoringMode == roudi::MonitoringMode::ON);
     IOX_DISCARD_RESULT(
         m_prcMgr->registerProcess(name, pid, user, monitorProcess, transmissionTimestamp, sessionId, versionInfo));
 }
 
-uint64_t RouDi::getUniqueSessionIdForProcess()
+uint64_t RouDi::getUniqueSessionIdForProcess() noexcept
 {
     static uint64_t sessionId = 0;
     return ++sessionId;
 }
 
-void RouDi::IpcMessageErrorHandler()
+void RouDi::IpcMessageErrorHandler() noexcept
 {
 }
 

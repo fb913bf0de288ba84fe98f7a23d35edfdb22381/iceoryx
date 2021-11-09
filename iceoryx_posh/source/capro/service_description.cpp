@@ -40,15 +40,14 @@ ServiceDescription::ClassHash::ClassHash(const std::initializer_list<uint32_t>& 
     }
 }
 
-uint32_t& ServiceDescription::ClassHash::operator[](
-    iox::cxx::range<uint64_t, 0U, CLASS_HASH_ELEMENT_COUNT - 1> index) noexcept
+uint32_t&
+ServiceDescription::ClassHash::operator[](iox::cxx::range<uint64_t, 0U, CLASS_HASH_ELEMENT_COUNT - 1> index) noexcept
 {
     return data[index];
 }
 
-const uint32_t&
-    ServiceDescription::ClassHash::operator[](iox::cxx::range<uint64_t, 0U, CLASS_HASH_ELEMENT_COUNT - 1> index) const
-    noexcept
+const uint32_t& ServiceDescription::ClassHash::operator[](
+    iox::cxx::range<uint64_t, 0U, CLASS_HASH_ELEMENT_COUNT - 1> index) const noexcept
 {
     return data[index];
 }
@@ -119,13 +118,8 @@ ServiceDescription::ServiceDescription(const IdString_t& service,
 {
 }
 
-bool ServiceDescription::operator==(const ServiceDescription& rhs) const
+bool ServiceDescription::operator==(const ServiceDescription& rhs) const noexcept
 {
-    if (!isValid() || !rhs.isValid())
-    {
-        return false;
-    }
-
     if (m_serviceString != rhs.m_serviceString)
     {
         return false;
@@ -143,12 +137,12 @@ bool ServiceDescription::operator==(const ServiceDescription& rhs) const
     return true;
 }
 
-bool ServiceDescription::operator!=(const ServiceDescription& rhs) const
+bool ServiceDescription::operator!=(const ServiceDescription& rhs) const noexcept
 {
     return !(*this == rhs);
 }
 
-bool ServiceDescription::operator<(const ServiceDescription& rhs) const
+bool ServiceDescription::operator<(const ServiceDescription& rhs) const noexcept
 {
     auto serviceCompare = m_serviceString.compare(rhs.m_serviceString);
     if (serviceCompare != 0)
@@ -171,7 +165,7 @@ bool ServiceDescription::operator<(const ServiceDescription& rhs) const
     return false;
 }
 
-ServiceDescription::operator cxx::Serialization() const
+ServiceDescription::operator cxx::Serialization() const noexcept
 {
     std::underlying_type<Scope>::type scope = static_cast<std::underlying_type<Scope>::type>(m_scope);
     std::underlying_type<Interfaces>::type interface =

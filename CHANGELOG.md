@@ -6,22 +6,34 @@
 
 **Features:**
 
+- Partial enable iceoryx building with msvc2015+clang [\#965](https://github.com/eclipse-iceoryx/iceoryx/issues/965)
+- C binding for posh configuration [\#930](https://github.com/eclipse-iceoryx/iceoryx/issues/930)
+- Enhance MacOS performance with timed{send,receive} functionality in unix domain socket[\#903](https://github.com/eclipse-iceoryx/iceoryx/issues/903)
+- Multi-Publisher support for DDS gateway and generic gateway class [\#900](https://github.com/eclipse-iceoryx/iceoryx/issues/900)
+- Replace `iox-gw-iceoryx2dds` and `iox-gw-dds2iceoryx` gateways with `iox-dds-gateway` [\#900](https://github.com/eclipse-iceoryx/iceoryx/issues/900)
 - Enhance posixCall[\#805](https://github.com/eclipse-iceoryx/iceoryx/issues/805)
 - New chunk available callback for the new C++[\#391](https://github.com/eclipse-iceoryx/iceoryx/issues/391)
 - Git Hooks on iceoryx[\#486](https://github.com/eclipse-iceoryx/iceoryx/issues/486)
 - static memory alternative for std::function[\#391](https://github.com/eclipse-iceoryx/iceoryx/issues/391)
 - Adding support for Helix QAC 2021.1[\#755](https://github.com/eclipse-iceoryx/iceoryx/issues/755) thanks to @toniglandy1
 - Axivion analysis on CI[\#409](https://github.com/eclipse-iceoryx/iceoryx/issues/409)
+- Cpptoml can be provided by an external source[\#951](https://github.com/eclipse-iceoryx/iceoryx/issues/)
 
 **Bugfixes:**
 
+- Fix support for libc++ on clang[\#905](https://github.com/eclipse-iceoryx/iceoryx/issues/905)
 - Fix warnings for gcc-11.1[\#838](https://github.com/eclipse-iceoryx/iceoryx/issues/838)
 - Incremental builds with the build script are broken[\#821](https://github.com/eclipse-iceoryx/iceoryx/issues/821)
 - Compile failed because of missing <limits> for GCC 11[\#811](https://github.com/eclipse-iceoryx/iceoryx/issues/811) thanks to @homalozoa
 - Unable to build cyclone dds idlpp-cxx [\#736](https://github.com/eclipse-iceoryx/iceoryx/issues/736)
+- Fix format string issues with introspection client [\#960](https://github.com/eclipse-iceoryx/iceoryx/issues/960) thanks to @roehling
+- Add support for Multi-Arch install destinations [\#961](https://github.com/eclipse-iceoryx/iceoryx/issues/961) thanks to @roehling
+- Fix a few misspellings in log messages [\#962](https://github.com/eclipse-iceoryx/iceoryx/issues/962) thanks to @roehling
 
 **Refactoring:**
 
+- Handle nullptr callbacks in waitset and listener[\#932](https://github.com/eclipse-iceoryx/iceoryx/issues/932)
+- Add clang-tidy rules for iceoryx_hoofs[\#889](https://github.com/eclipse-iceoryx/iceoryx/issues/889)
 - Move all tests into an anonymous namespace[\#563](https://github.com/eclipse-iceoryx/iceoryx/issues/563)
 - Refactor smart_c to use contract by design and expected[\#418](https://github.com/eclipse-iceoryx/iceoryx/issues/418)
 - PoshRuntime Mock[\#449](https://github.com/eclipse-iceoryx/iceoryx/issues/449)
@@ -30,6 +42,7 @@
 - Iox-#590 plantuml in design documentation[\#787](https://github.com/eclipse-iceoryx/iceoryx/pull/787)
 - Refine quality levels[\#425](https://github.com/eclipse-iceoryx/iceoryx/issues/425)
 - Clean-up std::terminate usage[\#261](https://github.com/eclipse-iceoryx/iceoryx/issues/261)
+- Add Quality Declaration Document[\#910](https://github.com/eclipse-iceoryx/iceoryx/issues/910)
 
 **API Breaking Changes:**
 
@@ -98,14 +111,60 @@ A well-defined `ServiceDescription` consists of three non-empty strings.
 
 ```cpp
 // before
-ServiceDescription(1U, 2U, 3U) myServiceDescription1;
-ServiceDescription("First", "Second") myServiceDescription3;
-ServiceDescription(iox::capro::AnyServiceString, iox::capro::AnyInstanceString, iox::capro::AnyEventString) myServiceDescription3;
+ServiceDescription myServiceDescription1(1U, 2U, 3U);
+ServiceDescription myServiceDescription3("First", "Second");
+ServiceDescription myServiceDescription3(iox::capro::AnyServiceString, iox::capro::AnyInstanceString, iox::capro::AnyEventString);
 
 // after
-ServiceDescription("Foo", "Bar", "Baz") myServiceDescription1;
-ServiceDescription("First", "Second", "DontCare") myServiceDescription2;
-ServiceDescription("Foo", "Bar", "Baz") myServiceDescription3;
+ServiceDescription myServiceDescription1("Foo", "Bar", "Baz");
+ServiceDescription myServiceDescription2("First", "Second", "DontCare");
+ServiceDescription myServiceDescription3("Foo", "Bar", "Baz");
+```
+
+The following classes have now an constructor marked as `explicit`:
+
+```cpp
+explicit DeadlineTimer(const iox::units::Duration timeToWait);
+explicit GenericRAII(const std::function<void()>& cleanupFunction);
+explicit mutex(const bool f_isRecursive);
+explicit PosixUser(const uid_t f_id);
+explicit PosixUser(const string_t& f_name);
+```
+
+Renaming in `FileReader` class and logging of iceoryx_hoofs
+
+```cpp
+// before
+iox::cxx::FileReader reader("filename");
+std::string str;
+if(reader.IsOpen()) {
+    reader.ReadLine(str);
+}
+
+static auto& logger = CreateLogger("", "", iox::log::LogManager::GetLogManager().DefaultLogLevel());
+
+// after
+iox::cxx::FileReader reader("filename");
+std::string str;
+if(reader.isOpen()) {
+    reader.readLine(str);
+}
+
+static auto& logger = createLogger("", "", iox::log::LogManager::GetLogManager().DefaultLogLevel());
+```
+
+The service-related methods have been moved from `PoshRuntime` to a separate class (TBD):
+
+```cpp
+// before
+poshRuntime.offerService(myServiceDescription);
+poshRuntime.stopOfferService(myServiceDescription);
+poshRuntime.findService({"ServiceA", iox::capro::AnyInstanceString});
+
+// after
+discoveryInfo.offerService(myServiceDescription);
+discoveryInfo.stopOfferService(myServiceDescription);
+discoveryInfo.findService("ServiceA", Wildcard);
 ```
 
 ## [v1.0.1](https://github.com/eclipse-iceoryx/iceoryx/tree/v1.0.0) (2021-06-15)

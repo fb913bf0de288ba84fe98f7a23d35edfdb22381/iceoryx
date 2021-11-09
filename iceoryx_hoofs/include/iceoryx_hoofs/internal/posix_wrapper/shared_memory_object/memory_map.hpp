@@ -55,7 +55,7 @@ class MemoryMap : public DesignPattern::Creation<MemoryMap, MemoryMapError>
     MemoryMap(MemoryMap&& rhs) noexcept;
     MemoryMap& operator=(MemoryMap&& rhs) noexcept;
 
-    ~MemoryMap();
+    ~MemoryMap() noexcept;
     void* getBaseAddress() const noexcept;
 
     friend class DesignPattern::Creation<MemoryMap, MemoryMapError>;
@@ -69,7 +69,7 @@ class MemoryMap : public DesignPattern::Creation<MemoryMap, MemoryMapError>
               const off_t offset = 0) noexcept;
     bool isInitialized() const noexcept;
     bool destroy() noexcept;
-    MemoryMapError errnoToEnum(const int32_t errnum) const noexcept;
+    static MemoryMapError errnoToEnum(const int32_t errnum) noexcept;
 
     void* m_baseAddress{nullptr};
     uint64_t m_length{0U};

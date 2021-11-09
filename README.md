@@ -18,17 +18,17 @@ tour, introducing the project scope and all you need for installation and a firs
 
 So first off: What is iceoryx?
 
-iceoryx is an inter-process-communication (IPC) middleware for various operating systems (currently we support Linux, MacOS and QNX).
+iceoryx is an inter-process-communication (IPC) middleware for various operating systems (currently we support Linux, MacOS, QNX and Windows 10).
 It has its origins in the automotive industry, where large amounts of data have to be transferred between different processes
 when it comes to driver assistance or automated driving systems. However, the efficient communication mechanisms can also be applied
-to a wider range of use cases, e.g. in the field of robotics or game development. 
+to a wider range of use cases, e.g. in the field of robotics or game development.
 
 <p align="center">
 <img src="https://user-images.githubusercontent.com/8661268/74612998-b962bc80-510a-11ea-97f0-62f41c5d287b.gif" width="100%">
 </p>
 
-iceoryx uses a true zero-copy, shared memory approach that allows to transfer data from publishers to subscribers without a single copy. 
-This ensures data transmissions with constant latency, regardless of the size of the payload. For more information have a look at the 
+iceoryx uses a true zero-copy, shared memory approach that allows to transfer data from publishers to subscribers without a single copy.
+This ensures data transmissions with constant latency, regardless of the size of the payload. For more information have a look at the
 [1000 words iceoryx introduction](https://www.eclipse.org/community/eclipse_newsletter/2019/december/4.php)
 
 <p align="center">
@@ -47,6 +47,15 @@ An example for such a "porcelain" API would be [ROS 2](https://www.ros.org/). Ot
 
 You can find the full API documentation on 🌐 [https://iceoryx.io](https://iceoryx.io).
 
+### Supported Platforms
+
+|Operating System| supports access rights for shared memory | command line parsing    |
+|----------------|:----------------------------------------:|:-----------------------:|
+| Linux          | yes                                      | yes                     |
+| QNX            | yes                                      | yes                     |
+| MacOS          | no, not planned for implementation       | yes                     |
+| Windows 10     | no, not planned for implementation       | will be implemented     |
+
 ### Where is Eclipse iceoryx used?
 
 |Framework | Description |
@@ -56,6 +65,7 @@ You can find the full API documentation on 🌐 [https://iceoryx.io](https://ice
 | [RTA-VRTE](https://www.etas.com/en/products/rta-vrte.php) | [Adaptive AUTOSAR](https://www.autosar.org/standards/adaptive-platform/) platform software framework for vehicle computer from [ETAS GmbH](https://www.etas.com) |
 | [Cyclone DDS](https://github.com/eclipse-cyclonedds/cyclonedds) | Performant and robust open-source DDS implementation maintained by [ADLINK Technology Inc.](https://www.adlinktech.com/) |
 | [Apex.OS](https://www.apex.ai/apex-os) | Safe and certified software framework for autonomous mobility systems from Apex.AI |
+| [AVIN AP](https://www.avinsystems.com/products/autosar_ap_solutions/) | AUTOSAR Adaptive Platform Product from AVIN Systems |
 
 ## Build and install
 
@@ -78,19 +88,21 @@ Please see the dedicated [README.md](tools/docker/README.md) for information on 
 * [Concepts](doc/conceptual-guide.md)
 * [Iceoryx Hoofs Hacker Guide](iceoryx_hoofs/README.md)
 
-### Targeted quality levels & platforms
+### Quality levels & platforms
 
 > [Quality level](./CONTRIBUTING.md#quality-levels) are 5 to 1+, where 1+ is highest level.
 
-|CMake project/target                     | QNX  | Linux, Windows, MacOS | Comment                             |
-|-----------------------------------------|:----:|:---------------------:|:-----------------------------------:|
-| iceoryx_hoofs                           | 1+   | 2                     |                                     |
-| iceoryx_posh                            | 1+, 2| 2                     | Will be split into separate targets |
-| iceoryx_binding_c                       | 2    | 2                     |                                     |
-| iceoryx_examples                        | 5    | 5                     | All example code in this folder     |
-| iceoryx_dds                             | 4    | 4                     |                                     |
-| iceoryx_introspection                   | 5    | 5                     |                                     |
-| iceoryx_meta                            | 5    | 5                     |                                     |
+Please see the [Quality Declaration](./QUALITY_DECLARATION.md) for details of the quality measures according to ROS 2 guidelines.
+
+|CMake project/target   | Current Level | Target Level QNX  | Target Level <br> Linux, Windows, macOS | Comment                             |
+|-----------------------|:-------------:|:-----------------:|:---------------------------------------:|:-----------------------------------:|
+| iceoryx_hoofs         | 2             | 1+                | 1                                       |                                     |
+| iceoryx_posh          | 2             | 1+, 2             | 1                                       | Will be split into separate targets |
+| iceoryx_binding_c     | 2             | 1+                | 1                                       |                                     |
+| iceoryx_examples      | 5             | 4                 | 4                                       | All example code in this folder     |
+| iceoryx_dds           | 4             | 4                 | 4                                       |                                     |
+| iceoryx_introspection | 5             | 4                 | 4                                       |                                     |
+| iceoryx_meta          | 5             | 5                 | 5                                       |                                     |
 
 Is something missing or you've got ideas for other nifty examples? Jump right away to the next section!
 
@@ -107,8 +119,12 @@ Get to know the upcoming features and the project scope in [PLANNED_FEATURES.md]
 |Name | Description | Technologies |
 |---|---|---|
 | [Larry.Robotics](https://gitlab.com/larry.robotics) | An iceoryx demonstrator for tinker, thinker and toddler | Demonstrator |
-| [iceoryx-rs](https://github.com/elBoberido/iceoryx-rs) | Experimental Rust wrapper for iceoryx | Rust |
+| [iceoryx-rs](https://github.com/eclipse-iceoryx/iceoryx-rs) | Experimental Rust wrapper for iceoryx | Rust |
 | [IceRay](https://github.com/elBoberido/iceray) | An iceoryx introspection client written in Rust | Rust |
+
+## Frequently Asked Questions (FAQ)
+
+[FAQ.md](./doc/website/FAQ.md)
 
 ## Governance & maintainers
 

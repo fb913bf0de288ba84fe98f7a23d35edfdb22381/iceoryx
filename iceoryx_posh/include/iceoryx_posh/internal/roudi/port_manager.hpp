@@ -57,7 +57,7 @@ class PortManager
     using PortConfigInfo = iox::runtime::PortConfigInfo;
     PortManager(RouDiMemoryInterface* roudiMemoryInterface) noexcept;
 
-    virtual ~PortManager() = default;
+    virtual ~PortManager() noexcept = default;
 
     /// @todo Remove this later
     void stopPortIntrospection() noexcept;
@@ -132,12 +132,12 @@ class PortManager
 
     void sendToAllMatchingInterfacePorts(const capro::CaproMessage& message) noexcept;
 
-    void addEntryToServiceRegistry(const capro::IdString_t& service, const capro::IdString_t& instance) noexcept;
-    void removeEntryFromServiceRegistry(const capro::IdString_t& service, const capro::IdString_t& instance) noexcept;
+    void addEntryToServiceRegistry(const capro::ServiceDescription& service) noexcept;
+    void removeEntryFromServiceRegistry(const capro::ServiceDescription& service) noexcept;
 
     template <typename T, std::enable_if_t<std::is_same<T, iox::build::OneToManyPolicy>::value>* = nullptr>
-    cxx::optional<RuntimeName_t> doesViolateCommunicationPolicy(const capro::ServiceDescription& service) const
-        noexcept;
+    cxx::optional<RuntimeName_t>
+    doesViolateCommunicationPolicy(const capro::ServiceDescription& service) const noexcept;
 
     template <typename T, std::enable_if_t<std::is_same<T, iox::build::ManyToManyPolicy>::value>* = nullptr>
     cxx::optional<RuntimeName_t>
